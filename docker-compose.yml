@@ -1,0 +1,37 @@
+services:
+  dogs-walkers-api:
+    build: ./app
+    env_file:
+      - ./app/.env
+    ports:
+      - "8000:8000"
+    entrypoint: "sh ./docker-entrypoint.sh"
+    restart: "always"
+    healthcheck:
+      test: [ "CMD-SHELL", 'curl -X GET -s http://dog-walker-api:8000/healthcheck || exit 1' ]
+      interval: 30s
+      timeout: 10s
+      retries: 50
+      start_period: 30s
+    depends_on:
+      dog-walker-db:
+        condition: service_healthy
+
+  dog-walker-db:
+    image: postgres:16-bullseye
+    container_name: postgres-db
+    env_file:
+      - dogs_walker_db/.env
+    expose:
+      - "5432"
+    restart: "always"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $$POSTGRES_DB -U $$POSTGRES_USER" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+volumes:
+  postgres_data:

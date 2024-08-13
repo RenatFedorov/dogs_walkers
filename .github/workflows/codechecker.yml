@@ -1,0 +1,73 @@
+name: Проверка
+on: push
+jobs:
+  linter:
+    runs-on: ubuntu-latest
+    env:
+      report_path: flake_report
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Установка Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Установка зависимостей
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r app/flake_requirements.txt
+      - name: Создание папки для отчета
+        run: |
+          mkdir -p ${{ env.report_path }}_${{ matrix.python-version }}
+      - name: Flake8
+        run: flake8 --config setup.cfg .
+        working-directory: app
+
+  mypy_check:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Установка Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Установка зависимостей
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r app/requirements.txt 
+          pip install mypy==1.11.0 types-PyYAML==6.0.12.12 types-requests==2.31.0.20240218
+
+      - name: Mypy проверка
+        run: mypy . --explicit-package-bases --check-untyped-defs
+        working-directory: app
+
+  pytest:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Установка Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Установка зависимостей
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r app/requirements.txt
+
+      - name: Pytest проверка
+        run: python3 -m pytest . -vv
+        working-directory: app
