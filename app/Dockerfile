@@ -11,5 +11,6 @@ RUN  pip install --upgrade pip \
 COPY . .
 
 EXPOSE 8000
+EXPOSE 10000
 
 ENTRYPOINT [ "/bin/bash", "docker-entrypoint.sh" ]
