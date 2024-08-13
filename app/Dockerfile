@@ -12,4 +12,4 @@ COPY . .
 
 EXPOSE 8000
 
-ENTRYPOINT [ "/bin/bash", "entripoint.sh" ]
+ENTRYPOINT [ "/bin/bash", "docker-entrypoint.sh" ]
